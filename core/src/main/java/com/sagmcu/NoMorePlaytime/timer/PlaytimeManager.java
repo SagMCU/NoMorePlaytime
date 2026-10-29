@@ -2,6 +2,7 @@ package com.sagmcu.NoMorePlaytime.timer;
 
 import com.sagmcu.NoMorePlaytime.config.Config;
 import com.sagmcu.NoMorePlaytime.data.Database;
+import com.sagmcu.NoMorePlaytime.permission.Permissions;
 import com.sagmcu.NoMorePlaytime.platform.Platform;
 import com.sagmcu.NoMorePlaytime.time.TimeFormat;
 
@@ -120,7 +121,7 @@ public final class PlaytimeManager {
 		state.kicked = false;
 		online.add(state);
 
-		if (state.remainingMs(now) == 0 && !platform.isOp(uuid)) {
+		if (state.remainingMs(now) == 0 && !exempt(uuid)) {
 			state.kicked = true;
 			platform.kick(uuid, config.plain(config.messages.joinDenied, "player", name));
 			return;
@@ -355,6 +356,11 @@ public final class PlaytimeManager {
 		}
 	}
 
+	/** Operators, and whoever holds the bypass permission, are never kicked or refused. */
+	private boolean exempt(UUID uuid) {
+		return Permissions.bypassesLimit(uuid, platform.isOp(uuid));
+	}
+
 	private Snapshot snapshot(PlayerState state, long now) {
 		long remaining = state.remainingMs(now);
 		return new Snapshot(state.name, remaining, state.paused, (int) Math.round(remaining * 100.0 / maxMs));
@@ -365,7 +371,7 @@ public final class PlaytimeManager {
 		if (state.kicked)
 			return;
 		long remaining = state.remainingMs(now);
-		if (remaining == 0 && !platform.isOp(state.uuid)) {
+		if (remaining == 0 && !exempt(state.uuid)) {
 			state.kicked = true;
 			platform.kick(state.uuid, config.plain(config.messages.kick, "player", state.name));
 			return;

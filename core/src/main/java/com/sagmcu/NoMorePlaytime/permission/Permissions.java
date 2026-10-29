@@ -28,6 +28,13 @@ public final class Permissions {
 	/** /timer on|off for another player. */
 	public static final String TOGGLE_TIMER_OTHERS = "nomoreplaytime.toggletimer.others";
 
+	/**
+	 * Exempts a player from the limit: never kicked, never refused at the door. Operators have it by default, so setting it
+	 * to false makes an operator play by the rules, and setting it to true exempts anybody else. {@link #ADMIN} does not
+	 * imply it.
+	 */
+	public static final String BYPASS = "nomoreplaytime.bypass";
+
 	private static final String[] NMP_COMMANDS = {HELP, SET, ADD, REMOVE, MAX, PAUSE, RESUME, RESET, CHECK, RELOAD};
 
 	/** Set once a lookup finds that LuckPerms' classes are not there, so that it is not tried again. */
@@ -50,6 +57,12 @@ public final class Permissions {
 				return true;
 		}
 		return everyoneByDefault || source.isOp();
+	}
+
+	/** Whether an online player is exempt from the limit: LuckPerms' verdict for {@link #BYPASS} if it has one, otherwise operators are. */
+	public static boolean bypassesLimit(UUID player, boolean op) {
+		Boolean verdict = query(player, BYPASS);
+		return verdict != null ? verdict : op;
 	}
 
 	/** Whether the source may use at least one /nmp subcommand, which is what makes the command visible to it. */

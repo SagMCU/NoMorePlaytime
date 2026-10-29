@@ -20,6 +20,9 @@ With LuckPerms installed (all three loaders), every command has a node; without 
 | `nomoreplaytime.help` / `set` / `add` / `remove` / `max` / `pause` / `resume` / `reset` / `check` / `reload` | `/nmp <subcommand>` | operators |
 | `nomoreplaytime.toggletimer` | `/timer on\|off` | everybody |
 | `nomoreplaytime.toggletimer.others` | `/timer on\|off <player>` | operators |
+| `nomoreplaytime.bypass` | never kicked or refused when out of time | operators |
+
+Set `nomoreplaytime.bypass` to `false` to make an operator play by the rules, or to `true` to exempt a non-operator. `nomoreplaytime.admin` does not imply it.
 
 Minecraft sends the command list to a player when they join, so a changed permission shows up in their tab completion after they rejoin.
 
