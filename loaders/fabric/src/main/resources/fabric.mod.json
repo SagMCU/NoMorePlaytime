@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "nomoreplaytime",
+	"version": "${version}",
+	"name": "NoMorePlaytime",
+	"description": "Limits how long each player can play, with a boss bar countdown, warnings and admin commands. Server-side only.",
+	"authors": [
+		"SagMCU and Claude"
+	],
+	"license": "All-Rights-Reserved",
+	"environment": "server",
+	"entrypoints": {
+		"main": [
+			"com.sagmcu.NoMorePlaytime.fabric.FabricEntrypoint"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "${mc_depends}",
+		"java": ">=${java_version}",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"luckperms": "*"
+	}
+}

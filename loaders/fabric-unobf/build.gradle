@@ -1,0 +1,36 @@
+// Fabric for the unobfuscated Minecraft versions (26.1 and later): no mappings, no remapping.
+// The entrypoint and fabric.mod.json are the ones of loaders/fabric.
+plugins {
+	id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+}
+
+apply from: "${rootDir}/../../shared.gradle"
+
+sourceSets.main {
+	java.srcDir "${rootDir}/../fabric/src/main/java"
+	resources.srcDir "${rootDir}/../fabric/src/main/resources"
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${cfg.getProperty('minecraft_version')}"
+	implementation "net.fabricmc:fabric-loader:${cfg.getProperty('loader_version')}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${cfg.getProperty('fabric_api_version')}"
+
+	// LuckPerms is optional at run time: only its API is needed to compile.
+	compileOnly "net.luckperms:api:${cfg.getProperty('luckperms_api_version')}"
+
+	// The database drivers, bundled into our jar (the drivers' own optional dependencies are not needed).
+	include(implementation("com.h2database:h2:${cfg.getProperty('h2_version')}"))
+	include(implementation("com.mysql:mysql-connector-j:${cfg.getProperty('mysql_version')}") { transitive = false })
+	include(implementation("org.mariadb.jdbc:mariadb-java-client:${cfg.getProperty('mariadb_version')}") { transitive = false })
+}
+
+processResources {
+	def values = [version     : cfg.getProperty('mod_version'),
+				  mc_depends  : cfg.getProperty('mc_depends'),
+				  java_version: cfg.getProperty('java_version')]
+	inputs.properties(values)
+	filesMatching('fabric.mod.json') {
+		expand(values)
+	}
+}

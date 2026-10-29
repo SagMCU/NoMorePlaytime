@@ -1,0 +1,51 @@
+plugins {
+	id 'java-library'
+	id 'net.neoforged.moddev' version '2.0.148'
+}
+
+apply from: "${rootDir}/../../shared.gradle"
+
+repositories {
+	mavenCentral()
+}
+
+neoForge {
+	version = cfg.getProperty('neo_version')
+}
+
+dependencies {
+	// LuckPerms is optional at run time: only its API is needed to compile.
+	compileOnly "net.luckperms:api:${cfg.getProperty('luckperms_api_version')}"
+
+	// The database drivers, bundled into our jar with Jar-in-Jar (the drivers' own optional dependencies are not needed).
+	jarJar(implementation("com.h2database:h2")) {
+		version {
+			strictly "[${cfg.getProperty('h2_version')},3)"
+			prefer cfg.getProperty('h2_version')
+		}
+	}
+	jarJar(implementation("com.mysql:mysql-connector-j")) {
+		transitive = false
+		version {
+			strictly "[${cfg.getProperty('mysql_version')},10)"
+			prefer cfg.getProperty('mysql_version')
+		}
+	}
+	jarJar(implementation("org.mariadb.jdbc:mariadb-java-client")) {
+		transitive = false
+		version {
+			strictly "[${cfg.getProperty('mariadb_version')},4)"
+			prefer cfg.getProperty('mariadb_version')
+		}
+	}
+}
+
+processResources {
+	def values = [mod_version: cfg.getProperty('mod_version'),
+				  neo_range  : cfg.getProperty('neo_range'),
+				  mc_range   : cfg.getProperty('mc_range')]
+	inputs.properties(values)
+	filesMatching('META-INF/neoforge.mods.toml') {
+		expand(values)
+	}
+}

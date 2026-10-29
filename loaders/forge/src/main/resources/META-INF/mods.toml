@@ -1,0 +1,25 @@
+modLoader = "javafml"
+loaderVersion = "${forge_loader_range}"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "nomoreplaytime"
+version = "${mod_version}"
+displayName = "NoMorePlaytime"
+authors = "SagMCU and Claude"
+displayTest = "IGNORE_ALL_VERSION"
+description = '''Limits how long each player can play, with a boss bar countdown, warnings and admin commands. Server-side only.'''
+
+[[dependencies.nomoreplaytime]]
+modId = "forge"
+mandatory = true
+versionRange = "${forge_loader_range}"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.nomoreplaytime]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${mc_range}"
+ordering = "NONE"
+side = "SERVER"

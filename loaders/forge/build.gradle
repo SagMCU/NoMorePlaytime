@@ -1,0 +1,56 @@
+plugins {
+	id 'java-library'
+	id 'net.minecraftforge.gradle' version '[7.0.3,8)'
+}
+
+apply from: "${rootDir}/../../shared.gradle"
+
+// "classic" or "bus7": which of src/classic and src/bus7 matches the Forge event API of this target.
+sourceSets.main.java.srcDir "src/${cfg.getProperty('shell')}/java"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(cfg.getProperty('java_version')))
+
+minecraft {
+	mappings channel: 'official', version: cfg.getProperty('minecraft_version')
+}
+
+repositories {
+	minecraft.mavenizer(it)
+	maven fg.forgeMaven
+	maven fg.minecraftLibsMaven
+	mavenCentral()
+}
+
+configurations {
+	bundled
+	implementation.extendsFrom bundled
+}
+
+dependencies {
+	implementation minecraft.dependency("net.minecraftforge:forge:${cfg.getProperty('minecraft_version')}-${cfg.getProperty('forge_version')}")
+	// LuckPerms is optional at run time: only its API is needed to compile.
+	compileOnly "net.luckperms:api:${cfg.getProperty('luckperms_api_version')}"
+
+	bundled "com.h2database:h2:${cfg.getProperty('h2_version')}"
+	bundled("com.mysql:mysql-connector-j:${cfg.getProperty('mysql_version')}") { transitive = false }
+	bundled("org.mariadb.jdbc:mariadb-java-client:${cfg.getProperty('mariadb_version')}") { transitive = false }
+}
+
+// The database drivers are copied into our jar (without their module descriptors, so the jar stays one plain mod).
+jar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from({ configurations.bundled.collect { zipTree(it) } }) {
+		exclude 'META-INF/MANIFEST.MF', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA',
+				'module-info.class', 'META-INF/versions/*/module-info.class'
+	}
+}
+
+processResources {
+	def values = [mod_version      : cfg.getProperty('mod_version'),
+				  forge_loader_range: cfg.getProperty('forge_loader_range'),
+				  mc_range         : cfg.getProperty('mc_range')]
+	inputs.properties(values)
+	filesMatching('META-INF/mods.toml') {
+		expand(values)
+	}
+}

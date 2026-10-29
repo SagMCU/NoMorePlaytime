@@ -1,0 +1,35 @@
+// Applied by every loader build (after its plugins block). Reads common.properties and the file picked with
+// -Ptarget=<name> from targets/<loader folder>/, and puts the shared sources on the source path.
+// Without -Ptarget (an IDE importing the project) the newest target of the loader is used.
+def repoRoot = new File(rootDir, '../..').canonicalFile
+def targetName = findProperty('target')
+if (targetName == null) {
+	def available = new File(repoRoot, "targets/${project.name}").listFiles({ it.name.endsWith('.properties') } as FileFilter)*.name.sort()
+	targetName = available.last() - '.properties'
+	logger.lifecycle("No -Ptarget given, using ${project.name}/${targetName}")
+}
+
+def cfg = new Properties()
+[new File(repoRoot, 'common.properties'), new File(repoRoot, "targets/${project.name}/${targetName}.properties")].each { file ->
+	if (!file.exists())
+		throw new GradleException("Missing ${file}")
+	file.withInputStream { cfg.load(it) }
+}
+ext.cfg = cfg
+
+group = 'com.sagmcu'
+// Gradle puts the version after the name: NoMorePlaytime-1.0.0-fabric-mc1.21.1-1.21.10.jar (the mod's own version
+// is expanded into the metadata files from mod_version, not from this).
+version = "${cfg.getProperty('mod_version')}-${cfg.getProperty('jar_suffix')}"
+base.archivesName = cfg.getProperty('mod_name')
+layout.buildDirectory = new File(projectDir, "build/${targetName}")
+
+sourceSets.main.java.srcDirs += [
+		new File(repoRoot, 'core/src/main/java'),
+		new File(repoRoot, 'mc/common/src/main/java'),
+		new File(repoRoot, "mc/compat/${cfg.getProperty('compat')}/src/main/java")]
+
+tasks.withType(JavaCompile).configureEach {
+	options.release = Integer.parseInt(cfg.getProperty('java_version'))
+	options.encoding = 'UTF-8'
+}
